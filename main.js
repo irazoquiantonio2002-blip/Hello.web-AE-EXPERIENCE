@@ -575,31 +575,69 @@ function closeMobileMenu() {
 })();
 
 /* ============================================================
-   FORMULARIO DE CONTACTO
+   FORMULARIO DE CONTACTO → WHATSAPP
+   Recopila todos los campos y abre WhatsApp con el mensaje
 ============================================================ */
 function handleFormSubmit(e) {
   e.preventDefault();
-  const btn     = e.target.querySelector('.form-submit');
+
+  const form    = e.target;
+  const btn     = form.querySelector('.form-submit');
   const success = document.getElementById('form-success');
   if (!btn) return;
 
-  /* Estado loading en el botón */
+  /* Número de WhatsApp de la agencia */
+  const WA_NUMBER = '5213325060622';
+
+  /* Recopilar valores del formulario */
+  const nombre   = form.querySelector('[name="nombre"]')?.value.trim()   || '';
+  const empresa  = form.querySelector('[name="empresa"]')?.value.trim()  || '';
+  const telefono = form.querySelector('[name="telefono"]')?.value.trim() || '';
+  const email    = form.querySelector('[name="email"]')?.value.trim()    || '';
+  const servicio = form.querySelector('[name="servicio"]')?.value.trim() || '';
+  const mensaje  = form.querySelector('[name="mensaje"]')?.value.trim()  || '';
+
+  /* Construir el mensaje de WhatsApp con formato legible */
+  const lineas = [
+    '🎯 *Nueva Consulta desde la Web — AE Marketing & BTL*',
+    '',
+    `👤 *Nombre:* ${nombre}`,
+    empresa  ? `🏢 *Empresa:* ${empresa}`                : null,
+    `📞 *Teléfono:* ${telefono}`,
+    `📧 *Email:* ${email}`,
+    servicio ? `🎪 *Servicio de interés:* ${servicio}`   : null,
+    '',
+    `💬 *Mensaje:*`,
+    mensaje,
+    '',
+    '---',
+    '_Enviado desde aemarketing.mx_',
+  ].filter(l => l !== null);   /* quitar nulls (campos vacíos opcionales) */
+
+  const textoWA = lineas.join('\n');
+  const urlWA   = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(textoWA)}`;
+
+  /* Animación del botón mientras "procesa" */
   btn.disabled = true;
-  const originalHTML = btn.innerHTML;
   btn.innerHTML = `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          style="animation:spin-slow 0.8s linear infinite">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
     </svg>
-    Enviando...
+    Preparando mensaje...
   `;
 
+  /* Breve pausa para que el usuario vea la animación y luego abre WA */
   setTimeout(() => {
+    /* Mostrar confirmación en la página */
     btn.style.display = 'none';
     success.classList.add('show');
-    e.target.reset();
-  }, 1400);
+    form.reset();
+
+    /* Abrir WhatsApp en nueva pestaña */
+    window.open(urlWA, '_blank', 'noopener,noreferrer');
+  }, 900);
 }
 
 /* ============================================================
